@@ -1,3 +1,6 @@
+import math
+import pandas as pd
+import pickle
 from django.shortcuts import render, redirect
 # import your predictor model here
 # Ex
@@ -5,8 +8,14 @@ from django.shortcuts import render, redirect
 # if predictor file in the current folder
 from app.models import Admin, User
 
+model=pickle.load(open('./model/model_pickel.pkl','rb+'))
+
 def home(request):
     msg = {}
+
+    temp={}
+    
+
     if request.method == 'POST':
         name = request.POST.get('name')
         age = request.POST.get('age')
@@ -16,6 +25,38 @@ def home(request):
         university = request.POST.get('university')
         course = request.POST.get('course')
         workexp = request.POST.get('workexp')
+
+        lor = request.POST.get('lor')
+        toefl = request.POST.get('toefl')
+        gre = request.POST.get('gre')
+        cgpa = request.POST.get('cgpa')
+
+        
+
+        temp['gre']=float(gre)
+        temp['toefl']=float(toefl)
+        temp['university']=(float(course)+float(university))/2.0
+        temp['lor']=float(lor)
+        temp['cgpa']=float(cgpa)
+        temp['workexp']=float(workexp)
+
+        testdata=pd.DataFrame({'x':temp}).transpose()
+        score=model.predict(testdata)[0]
+
+        if(score>1):
+            score=score-int(score)
+        
+        if(score<0.65):
+            E="Yes"
+        else:
+            E="No"
+
+        if(E=="Yes"):
+            PI=900000*score
+        else:
+            PI=0
+
+
         # answer = model(name, age, email, phnno, loanamount, university, course, workexp)
         #print(name, age, email, phnno, loanamount, university, course, workexp)
         msg = {
@@ -23,11 +64,15 @@ def home(request):
             "name": name,
             "age": age,
             "email": email,
-            "answer": "Not Known for now"
+            "eligibility": E,
+            "Predicted_Income":int(PI)
         }
         user = User(name=name, age=age, email=email, phnno=phnno, loanamount=loanamount, 
                     university=university, course=course, workexp=workexp)
         user.save()
+
+        
+
         print("User Saved")
         msg['flg'] = 1
     return render(request, 'index.html', msg)
@@ -60,9 +105,15 @@ def adminhome(request):
                 "loanamount": user.loanamount,
                 "university": user.university,
                 "course": user.course,
-                "workexp": user.workexp
+                "workexp": user.workexp,
             }
+            
+           
+
             lst.append(lvl)
+
+        
+
         msg['data'] = lst 
         return render(request, 'adminhome.html', msg)
     return redirect(home)
