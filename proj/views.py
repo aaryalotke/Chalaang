@@ -3,7 +3,7 @@ import pandas as pd
 import pickle
 from django.shortcuts import render, redirect
 # import your predictor model here
-# Ex
+
 # from predictor import model
 # if predictor file in the current folder
 from app.models import Admin, User
