@@ -33,12 +33,12 @@ def home(request):
 
         
 
-        temp['gre']=float(gre)
-        temp['toefl']=float(toefl)
-        temp['university']=(float(course)+float(university))/2.0
-        temp['lor']=float(lor)
-        temp['cgpa']=float(cgpa)
-        temp['workexp']=float(workexp)
+        temp['GRE Score']=float(gre)
+        temp['TOEFL Score']=float(toefl)
+        temp['University Rating']=(float(course)+float(university))/2.0
+        temp['LOR']=float(lor)
+        temp['CGPA']=float(cgpa)
+        temp['Work Experience']=float(workexp)
 
         testdata=pd.DataFrame({'x':temp}).transpose()
         score=model.predict(testdata)[0]
@@ -46,7 +46,7 @@ def home(request):
         if(score>1):
             score=score-int(score)
         
-        if(score<0.65):
+        if(score<0.4 and float(age)>=18):
             E="Yes"
         else:
             E="No"
